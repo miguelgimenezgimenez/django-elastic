@@ -14,5 +14,6 @@ class SoundRecordingDocument(DocType):
         fields = [
             'artist',
             'title',
-            'isrc'
+            'isrc',
+            'length'
         ]

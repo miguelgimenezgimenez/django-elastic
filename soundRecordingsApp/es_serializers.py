@@ -8,5 +8,6 @@ class SoundRecordingDocumentSimpleSerializer(DocumentSerializer):
         fields = (
             'artist',
             'title',
-            'isrc'
+            'isrc',
+            'length'
         )

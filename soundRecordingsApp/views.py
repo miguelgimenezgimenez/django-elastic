@@ -1,5 +1,5 @@
-from soundRecordingsApp.serializers import SoundRecordingModelSerializer
-from soundRecordingsApp.models import SoundRecording
+from soundRecordingsApp.serializers import SoundRecordingInputModelSerializer
+from soundRecordingsApp.models import SoundRecording, SoundRecordingInput
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from django.contrib import messages
@@ -8,6 +8,7 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.renderers import JSONRenderer
 
 import logging
 
@@ -24,17 +25,39 @@ from django.views.decorators.csrf import csrf_exempt
 # client = Elasticsearch()
 
 from .es_documents import SoundRecordingDocument
+from elasticsearch_dsl import Q
 
 @csrf_exempt
 def getMatches(request):
-	s = SoundRecordingDocument.search().query("match", artist="Muse")
+	snippets = SoundRecordingInput.objects.all()
+	serializer = SoundRecordingInputModelSerializer(snippets, many=True)
 
-	for hit in s:
-		print(
-			"title : {},artitst {}".format(hit.title, hit.artist)
-		)
-	
+	for inputRecording in serializer.data:
+		artist =inputRecording.get('title') 
+		title =inputRecording.get('title')
+		isrc =inputRecording.get('isrc')
+		isrc =inputRecording.get('isrc')
+		length =inputRecording.get('length')
 
+		q = Q('bool',should=[
+			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
+			Q("multi_match", query=title, fields=['title'], fuzziness="AUTO", boost=0.5),
+			Q("multi_match", query=isrc, fields=['isrc']),
+			Q("multi_match", query=length, fields=['length'], boost=0.05)])
+
+		s = SoundRecordingDocument.search().query(q)
+		qs = s.to_queryset()
+
+		for hit in qs:
+			print(hit)
+			print(
+				"title : {},artitst {}, length:{}".format(hit.title, hit.artist, hit.length)
+			)
+	Response.accepted_renderer = JSONRenderer()
+	Response.accepted_media_type = "application/json"
+	Response.renderer_context = {}
+
+	return Response({'response':'ok'})
 
 
 
@@ -74,19 +97,19 @@ def upload_csv(request):
 			try:
 				# print(data_dict)
 
-				soundRecordingForm = SoundRecording(**data_dict)
+				soundRecordingForm = SoundRecordingInput(**data_dict)
 				# soundRecordingForm.getSimilarityScores()
-				bulk_list.append(soundRecordingForm)
+				# bulk_list.append(soundRecordingForm)
 				# SoundRecording.objects.bulk_create(bulk_list)
 				if True:
-					# soundRecordingForm.save()
+					soundRecordingForm.save()
 					print('ok')								
 				else:
 					logging.getLogger("error_logger").error("form.errors.as_json()")												
 			except Exception as e:
 				logging.getLogger("error_logger").error(repr(e))					
 				pass
-		SoundRecording.objects.bulk_create(bulk_list)
+		# SoundRecordingInput.objects.bulk_create(bulk_list)
 
 	except Exception as e:
 		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
