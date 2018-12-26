@@ -1,4 +1,3 @@
-from soundRecordingsApp.serializers import SoundRecordingInputModelSerializer
 from soundRecordingsApp.models import SoundRecording, SoundRecordingInput
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -13,51 +12,6 @@ from rest_framework.renderers import JSONRenderer
 import logging
 
 from django.views.decorators.csrf import csrf_exempt
-
-# class SoundRecordingViewSet(viewsets.ModelViewSet):
-#     queryset = SoundRecording.objects.all()
-#     serializer_class = SoundRecordingModelSerializer
-#     pagination_class = PageNumberPagination
-
-# from elasticsearch import Elasticsearch
-# from elasticsearch_dsl import Search
-
-# client = Elasticsearch()
-
-from .es_documents import SoundRecordingDocument
-from elasticsearch_dsl import Q
-
-@csrf_exempt
-def getMatches(request):
-	snippets = SoundRecordingInput.objects.all()
-	serializer = SoundRecordingInputModelSerializer(snippets, many=True)
-
-	for inputRecording in serializer.data:
-		artist =inputRecording.get('title') 
-		title =inputRecording.get('title')
-		isrc =inputRecording.get('isrc')
-		isrc =inputRecording.get('isrc')
-		length =inputRecording.get('length')
-
-		q = Q('bool',should=[
-			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
-			Q("multi_match", query=title, fields=['title'], fuzziness="AUTO", boost=0.5),
-			Q("multi_match", query=isrc, fields=['isrc']),
-			Q("multi_match", query=length, fields=['length'], boost=0.05)])
-
-		s = SoundRecordingDocument.search().query(q)
-		qs = s.to_queryset()
-
-		for hit in qs:
-			print(hit)
-			print(
-				"title : {},artitst {}, length:{}".format(hit.title, hit.artist, hit.length)
-			)
-	Response.accepted_renderer = JSONRenderer()
-	Response.accepted_media_type = "application/json"
-	Response.renderer_context = {}
-
-	return Response({'response':'ok'})
 
 
 
@@ -79,7 +33,6 @@ def upload_csv(request):
 		# 	return ResponseRedirect(reverse("musicApi:upload_csv"))
 
 		file_data = csv_file.read().decode("utf-8")		
-		print(file_data)
 		
 		lines = file_data.split("\n")
 		lines = lines[1:-1]
@@ -95,25 +48,21 @@ def upload_csv(request):
 			data_dict["isrc"] = fields[2]
 			data_dict["length"] = fields[3]
 			try:
-				# print(data_dict)
-
-				soundRecordingForm = SoundRecordingInput(**data_dict)
-				# soundRecordingForm.getSimilarityScores()
-				bulk_list.append(soundRecordingForm)
-				# SoundRecording.objects.bulk_create(bulk_list)
-				if True:
-					# soundRecordingForm.save()
-					print('ok')								
-				else:
-					logging.getLogger("error_logger").error("form.errors.as_json()")												
+				serializer = SoundRecordingInput(**data_dict)
+				bulk_list.append(serializer)
+															
 			except Exception as e:
 				logging.getLogger("error_logger").error(repr(e))					
 				pass
+
 		SoundRecordingInput.objects.bulk_create(bulk_list)
 
 	except Exception as e:
 		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 		messages.error(request,"Unable to upload file. "+repr(e))
 
+	Response.accepted_renderer = JSONRenderer()
+	Response.accepted_media_type = "application/json"
+	Response.renderer_context = {}
 
 	return Response({'response':'ok'})

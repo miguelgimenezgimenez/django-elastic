@@ -1,18 +1,14 @@
 from rest_framework import serializers
-from soundRecordingsApp.models import SoundRecording,SoundRecordingInput
+from soundRecordingsApp.models import SoundRecording, SoundRecordingInput
 
 
 class SoundRecordingModelSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = SoundRecording
-		fields = ('id','artist', 'title', 'isrc', 'length')
+		fields =  '__all__'
 
 class SoundRecordingInputModelSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = SoundRecordingInput
-		fields = ('id','artist', 'title', 'isrc', 'length','matches')
+		fields =  '__all__'
 
-	# def create(self, validated_data):
-	# 	obj = SoundRecordingInput.objects.create(**validated_data)
-	# 	print(validated_data,'CRREEAAAAATEEEE')
-	# 	return obj

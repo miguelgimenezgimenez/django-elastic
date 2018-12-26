@@ -18,6 +18,5 @@ from django.urls import path
 app_name = 'soundRecordingsApp'
 
 urlpatterns = [
-    path('', views.upload_csv, name="list"),
-    path('getmatches', views.getMatches, name="list"),
+    path('', views.upload_csv, name="list")
 ]
