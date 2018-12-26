@@ -48,14 +48,14 @@ def upload_csv(request):
 			data_dict["isrc"] = fields[2]
 			data_dict["length"] = fields[3]
 			try:
-				serializer = SoundRecordingInput(**data_dict)
+				serializer = SoundRecording(**data_dict)
 				bulk_list.append(serializer)
 															
 			except Exception as e:
 				logging.getLogger("error_logger").error(repr(e))					
 				pass
 
-		SoundRecordingInput.objects.bulk_create(bulk_list)
+		SoundRecording.objects.bulk_create(bulk_list)
 
 	except Exception as e:
 		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
