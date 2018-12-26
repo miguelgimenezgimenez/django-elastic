@@ -99,17 +99,17 @@ def upload_csv(request):
 
 				soundRecordingForm = SoundRecordingInput(**data_dict)
 				# soundRecordingForm.getSimilarityScores()
-				# bulk_list.append(soundRecordingForm)
+				bulk_list.append(soundRecordingForm)
 				# SoundRecording.objects.bulk_create(bulk_list)
 				if True:
-					soundRecordingForm.save()
+					# soundRecordingForm.save()
 					print('ok')								
 				else:
 					logging.getLogger("error_logger").error("form.errors.as_json()")												
 			except Exception as e:
 				logging.getLogger("error_logger").error(repr(e))					
 				pass
-		# SoundRecordingInput.objects.bulk_create(bulk_list)
+		SoundRecordingInput.objects.bulk_create(bulk_list)
 
 	except Exception as e:
 		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))

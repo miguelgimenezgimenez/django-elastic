@@ -6,11 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-
-
-@python_2_unicode_compatible
-class SoundRecording(models.Model):
-
+class BaseModelInterface(models.Model):
 	artist = models.CharField(max_length=300, blank=True)
 	 
 	title = models.CharField(max_length=300, blank=True)
@@ -18,21 +14,40 @@ class SoundRecording(models.Model):
 	isrc = models.CharField(max_length=12, blank=True)
 
 	length = models.CharField(max_length=12, blank=True)
+
+	class Meta:
+		abstract = True
+
+
+@python_2_unicode_compatible
+class SoundRecording(BaseModelInterface):
 	
-   
-class SoundRecordingInput(SoundRecording):
+	def __str__(self):
+		return "Title: {0} Artist: {1}".format(self.title, self.artist)
+
+
+
+@python_2_unicode_compatible
+class SoundRecordingInput(BaseModelInterface):
 
 	matches = models.ManyToManyField(SoundRecording, through='SimilarityScores',related_name='matchesByScore')
 
-	def getSimilarityScores(self):
-		soundRecording = SoundRecording.objects.all()
-		# for recording in soundRecording:					
-			
-
+	selectedCandidate = models.ForeignKey (
+			SoundRecording,
+			on_delete=models.SET_NULL,
+			null=True
+		)
+	
+	def __str__(self):
+		return "Title: {0} Aritist: {1}".format(self.title, self.artist)
+		
+@python_2_unicode_compatible
 class SimilarityScores(models.Model):
 
 	soundRecording = models.ForeignKey(SoundRecording, on_delete=models.CASCADE, related_name='soundRecordingMatches')
 	
 	soundRecordingInput = models.ForeignKey(SoundRecordingInput, on_delete=models.CASCADE, related_name='soundInputMatches')
+
 	score = models.IntegerField()
+
 	
