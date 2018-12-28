@@ -25,22 +25,9 @@ class SoundRecording(BaseModelInterface):
 	def __str__(self):
 		return "Title: {0} Artist: {1}".format(self.title, self.artist)
 
-class SoundRecordingInputModelManager(models.Manager):
-	def bulk_create(self, *args, **kwargs):
-		# TODO: fix correct loading of modules(havent had time to figure it out correctly)
-		# try:
-			# the reason this module is loaded heres is because if loaded before the modules it requires are not ready to be imported
-			# from soundRecordingsApp import views
-			# getMatches(*args)
-		# except Exception as e:
-			# TODO: handle errors
-			# print(e)
-		return super().bulk_create(*args,*kwargs)
 
 @python_2_unicode_compatible
 class SoundRecordingInput(BaseModelInterface):
-
-	objects = SoundRecordingInputModelManager()
 
 	matches = models.ManyToManyField(SoundRecording, through='SimilarityScores',related_name='matchesByScore')
 

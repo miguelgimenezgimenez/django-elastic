@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.http import Http404
+from django.conf import settings
+import logging
 
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
@@ -9,26 +11,23 @@ from rest_framework.renderers import JSONRenderer
 
 from elasticsearch_dsl import Q
 
-import logging
-from django.views.decorators.csrf import csrf_exempt
+from soundRecordingsApp.serializers import SoundRecordingModelSerializer,SoundRecordingInputModelSerializer
 
-from soundRecordingsApp.serializers import SoundRecordingInputModelSerializer
-from soundRecordingsApp.models import SoundRecording, SoundRecordingInput
-from soundRecordingsApp.serializers import SoundRecordingInputModelSerializer
-from soundRecordingsApp.models import SoundRecording, SoundRecordingInput
+from soundRecordingsApp.models import SoundRecording, SoundRecordingInput, SimilarityScores
 from soundRecordingsApp.es_documents import SoundRecordingDocument
 
+ES_INDEX = settings.ES_INDEX
 
 
 
 def get_matches(soundRecordingInputs):
-	serializer = SoundRecordingInputModelSerializer(soundRecordingInputs, many=True)
-	for inputRecording in serializer.data:
-		artist =inputRecording.get('title') 
-		title =inputRecording.get('title')
-		isrc =inputRecording.get('isrc')
-		isrc =inputRecording.get('isrc')
-		length =inputRecording.get('length')
+	
+	for recordingInput in soundRecordingInputs:
+		serializedRecording = SoundRecordingInputModelSerializer(recordingInput)
+		artist =serializedRecording.data.get('artist') 
+		title =serializedRecording.data.get('title')
+		isrc =serializedRecording.data.get('isrc')
+		length =serializedRecording.data.get('length')
 
 		q = Q('bool',should=[
 			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
@@ -37,11 +36,19 @@ def get_matches(soundRecordingInputs):
 			Q("multi_match", query=length, fields=['length'], boost=0.05)])
 
 		s = SoundRecordingDocument.search().query(q)
+
+
 		qs = s.to_queryset()
 
-		# for hit in qs:
-			
-	
+		bulk_list = []
+
+		for score, hit in enumerate(qs):
+			similarityScore = SimilarityScores(soundRecordingInput=recordingInput, soundRecording=hit, score=score )
+			bulk_list.append(similarityScore)
+		
+		SimilarityScores.objects.bulk_create(bulk_list)
+
+
 
 def upload(request, type):
 	data = {}
@@ -68,22 +75,23 @@ def upload(request, type):
 	
 	lines = file_data.split("\n")
 	
-	# TODO : validate CSV file fields.
 	lines = lines[1:-1]
 
 	bulk_list = []
-	for line in lines:						
+	# TODO : validate and sanitize CSV file fields.
+	for line in lines:
 		fields = line.split(",")
 		data_dict = {}
-		data_dict["artist"] = fields[0]
-		data_dict["title"] = fields[1]
-		data_dict["isrc"] = fields[2]
-		data_dict["length"] = fields[3]
+		data_dict["artist"] = fields[0].replace('"', '')
+		data_dict["title"] = fields[1].replace('"', '')
+		data_dict["isrc"] = fields[2].replace('"', '')
+		data_dict["length"] = fields[3].replace('"', '')
 
 		bulk_list.append(Model(**data_dict))
 	
 	# TODO: add batches in bulk create for allowing the upload of bigger files.
 	return Model.objects.bulk_create(bulk_list)
+	
 
 
 
@@ -93,8 +101,11 @@ def upload(request, type):
 class SoundRecordingInputList(APIView):
 
 	def get(self, request, format=None):
-		return Response({'response':'ok'})
-
+		allSoundRecodingInputs = SoundRecordingInput.objects.all()
+		for record in allSoundRecodingInputs:
+			print(record.matches.all())
+		serializer = SoundRecordingInputModelSerializer(allSoundRecodingInputs, many=True)
+		return Response(serializer.data)
 	# def put(self, request, format=None):
 	# 	snippets = SoundRecordingInput.objects.all()
 	# 	serializer = SoundRecordingInputModelSerializer(snippets, many=True)
@@ -115,7 +126,9 @@ class SoundRecordingInputList(APIView):
 class SoundRecordingList(APIView):
 
 	def get(self, request, format=None):
-		return Response({'response':'ok'})
+		allSoundRecodings= SoundRecordingInput.objects.all()
+		serializer = SoundRecordingInputModelSerializer(allSoundRecodings, many=True)
+		return Response(serializer.data)
 
 	# def put(self, request, format=None):
 	# 	snippets = SoundRecordingInput.objects.all()
@@ -123,10 +136,13 @@ class SoundRecordingList(APIView):
 
 	def post(self, request, format=None):
 		try:		
-			records = upload(request, 'db_record')
+			upload(request, 'db_record')
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
-
+		ES_INDEX.refresh()
 		get_matches(SoundRecordingInput.objects.all())
-		return Response({'msg':'ok'}, status=status.HTTP_201_CREATED)
+		
+		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
+
+

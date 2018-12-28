@@ -12,3 +12,4 @@ urlpatterns = [
     # path('soundrecording/<int:pk>/', views.SoundRecordingDetail.as_view())
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
+

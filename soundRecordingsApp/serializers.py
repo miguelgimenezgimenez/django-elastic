@@ -8,6 +8,8 @@ class SoundRecordingModelSerializer(serializers.ModelSerializer):
 		fields =  '__all__'
 
 class SoundRecordingInputModelSerializer(serializers.ModelSerializer):
+	matches = SoundRecordingModelSerializer(many=True, read_only=True)
+
 	class Meta:
 		model = SoundRecordingInput
 		fields =  '__all__'
