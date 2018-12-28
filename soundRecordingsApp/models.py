@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 
 
+
 class BaseModelInterface(models.Model):
 	artist = models.CharField(max_length=300, blank=True)
 	 
@@ -27,13 +28,13 @@ class SoundRecording(BaseModelInterface):
 class SoundRecordingInputModelManager(models.Manager):
 	def bulk_create(self, *args, **kwargs):
 		# TODO: fix correct loading of modules(havent had time to figure it out correctly)
-		try:
+		# try:
 			# the reason this module is loaded heres is because if loaded before the modules it requires are not ready to be imported
-			from soundRecordingsApp.search import getMatches
-			getMatches(*args)
-		except Exception as e:
+			# from soundRecordingsApp import views
+			# getMatches(*args)
+		# except Exception as e:
 			# TODO: handle errors
-			print(e)
+			# print(e)
 		return super().bulk_create(*args,*kwargs)
 
 @python_2_unicode_compatible
