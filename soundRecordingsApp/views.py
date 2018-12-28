@@ -21,7 +21,7 @@ from soundRecordingsApp.es_documents import SoundRecordingDocument
 
 
 
-def getMatches(soundRecordingInputs):
+def get_matches(soundRecordingInputs):
 	serializer = SoundRecordingInputModelSerializer(soundRecordingInputs, many=True)
 	for inputRecording in serializer.data:
 		artist =inputRecording.get('title') 
@@ -39,11 +39,8 @@ def getMatches(soundRecordingInputs):
 		s = SoundRecordingDocument.search().query(q)
 		qs = s.to_queryset()
 
-		for hit in qs:
-			print(hit)
-			print(
-				"title : {},artitst {}, length:{}".format(hit.title, hit.artist, hit.length)
-			)
+		# for hit in qs:
+			
 	
 
 def upload(request, type):
@@ -62,7 +59,7 @@ def upload(request, type):
 		raise TypeError('File is not CSV Type')
 	# TODO: allow the uploading of big files.(by adding threads and bulk_insert by chunks maybe?)	
 
-	# multiple_chunk Returns True if the file is large enough to require multiple chunks to access all of its content give some chunk_size.(default 64kb)
+	# multiple_chunks Returns True if the file is large enough to require multiple chunks to access all of its content give some chunk_size.(default 64kb)
 	if csv_file.multiple_chunks():
 		messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
 
@@ -108,8 +105,8 @@ class SoundRecordingInputList(APIView):
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
-		serializer = SoundRecordingInputModelSerializer(uploaded_records, many=True)
-
+		
+		get_matches(uploaded_records)
 
 		return Response('ok', status=status.HTTP_201_CREATED)
 
@@ -131,4 +128,5 @@ class SoundRecordingList(APIView):
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 
+		get_matches(SoundRecordingInput.objects.all())
 		return Response({'msg':'ok'}, status=status.HTTP_201_CREATED)
