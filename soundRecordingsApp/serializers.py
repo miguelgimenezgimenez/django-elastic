@@ -7,8 +7,11 @@ class SoundRecordingModelSerializer(serializers.ModelSerializer):
 		model = SoundRecording
 		fields =  '__all__'
 
+
+
+# THIS SERIALIZER IS USED IN THE get_matches function
 class SoundRecordingInputModelSerializer(serializers.ModelSerializer):
-	matches = SoundRecordingMatchSerializer(many=True, read_only=True)
+	matches = SoundRecordingModelSerializer(many=True, read_only=True)
 
 	class Meta:
 		model = SoundRecordingInput
@@ -33,9 +36,7 @@ class SoundRecordingInputMatchesSerializer(serializers.ModelSerializer):
 		fields =  '__all__'
 	# I am not sure this is the most efficient way.
 	def get_matches(self, obj):
-
 			matches = []
-
 			similarityScores = SimilarityScores.objects.filter(soundRecordingInput_id=obj.id)
 			
 			for match in similarityScores :
@@ -47,6 +48,7 @@ class SoundRecordingInputMatchesSerializer(serializers.ModelSerializer):
 				serializer = SoundRecordingMatchSerializer(soundRecording)
 				matches.append(serializer.data)
 
+			
 			return matches
 
-			
+

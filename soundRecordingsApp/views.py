@@ -11,7 +11,7 @@ from rest_framework.renderers import JSONRenderer
 
 from elasticsearch_dsl import Q
 
-from soundRecordingsApp.serializers import SoundRecordingModelSerializer,SoundRecordingInputModelSerializer
+from soundRecordingsApp.serializers import SoundRecordingModelSerializer,SoundRecordingInputModelSerializer,SoundRecordingInputMatchesSerializer
 
 from soundRecordingsApp.models import SoundRecording, SoundRecordingInput, SimilarityScores
 from soundRecordingsApp.es_documents import SoundRecordingDocument
@@ -32,18 +32,18 @@ def get_matches(soundRecordingInputs):
 		q = Q('bool',should=[
 			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
 			Q("multi_match", query=title, fields=['title'], fuzziness="AUTO", boost=0.5),
-			Q("multi_match", query=isrc, fields=['isrc']),
-			# i dont like adding fuzziness here because its not worth it , but scores do get more precise.
-			Q("multi_match", query=length, fields=['length'], fuzziness="AUTO",boost=0.05)])
+			Q("match",isrc=isrc),
+			# The length match should only count if one of the previous fields is positive (havent )
+			Q("multi_match", query=length, fields=['length'], boost=0.05)])
 
 		s = SoundRecordingDocument.search().query(q)
 
-
 		qs = s.to_queryset()
 
-		bulk_list = []
 
-		for score, hit in enumerate(qs):
+		bulk_list = []
+		# The similarity score will be the elastic search score, and since it is given in order i will just store the position, being the lowest number the highest score.
+		for score, hit in enumerate(qs):			
 			similarityScore = SimilarityScores(soundRecordingInput=recordingInput, soundRecording=hit, score=score )
 			bulk_list.append(similarityScore)
 		
@@ -134,7 +134,7 @@ class SoundRecordingInputList(APIView):
 
 	def get(self, request, format=None):
 		unMatchedSoundRecordingInputs = SoundRecordingInput.objects.filter(selectedCandidate=None)
-		serializer = SoundRecordingInputModelSerializer(unMatchedSoundRecordingInputs, many=True)
+		serializer = SoundRecordingInputMatchesSerializer(unMatchedSoundRecordingInputs, many=True)
 		return Response(serializer.data)
 	# def put(self, request, format=None):
 	# 	snippets = SoundRecordingInput.objects.all()
