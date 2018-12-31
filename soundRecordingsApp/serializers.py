@@ -7,8 +7,15 @@ class SoundRecordingModelSerializer(serializers.ModelSerializer):
 		model = SoundRecording
 		fields =  '__all__'
 
+class SoundRecordingMatchSerializer(serializers.ModelSerializer):
+	score = serializers.IntegerField(read_only=True)
+
+	class Meta:
+		model = SoundRecording
+		fields =  '__all__'
+
 class SoundRecordingInputModelSerializer(serializers.ModelSerializer):
-	matches = SoundRecordingModelSerializer(many=True, read_only=True)
+	matches = SoundRecordingMatchSerializer(many=True, read_only=True)
 
 	class Meta:
 		model = SoundRecordingInput

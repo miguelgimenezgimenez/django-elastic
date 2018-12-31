@@ -33,7 +33,8 @@ def get_matches(soundRecordingInputs):
 			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
 			Q("multi_match", query=title, fields=['title'], fuzziness="AUTO", boost=0.5),
 			Q("multi_match", query=isrc, fields=['isrc']),
-			Q("multi_match", query=length, fields=['length'], boost=0.05)])
+			# i dont like adding fuzziness here because its not worth it , but scores do get more precise.
+			Q("multi_match", query=length, fields=['length'], fuzziness="AUTO",boost=0.05)])
 
 		s = SoundRecordingDocument.search().query(q)
 
@@ -82,11 +83,16 @@ def upload(request, type):
 	for line in lines:
 		fields = line.split(",")
 		data_dict = {}
-		data_dict["artist"] = fields[0].replace('"', '')
-		data_dict["title"] = fields[1].replace('"', '')
-		data_dict["isrc"] = fields[2].replace('"', '')
-		data_dict["length"] = fields[3].replace('"', '')
-
+		try:
+			data_dict["artist"] = fields[0].replace('"', '')
+			data_dict["title"] = fields[1].replace('"', '')
+			data_dict["isrc"] = fields[2].replace('"', '')
+			data_dict["length"] = fields[3].replace('"', '')
+	
+		except IndexError as e:
+			# if no more fields are found just continue
+			pass
+		
 		bulk_list.append(Model(**data_dict))
 	
 	# TODO: add batches in bulk create for allowing the upload of bigger files.
@@ -96,15 +102,39 @@ def upload(request, type):
 
 
 
+class SoundRecordingInputDetail(APIView):
+	def get_object(self, pk):
+		try:
+			return SoundRecordingInput.objects.get(pk=pk)
+		except SoundRecordingInput.DoesNotExist:
+			raise Http404
+
+	def put(self, request, pk, format=None):
+		current = self.get_object(pk)
+		matchId = self.request.data.get('matchId', None)
+	
+		match =SoundRecording.objects.get(pk=matchId)
+		try:
+			current.selectedCandidate = match
+			current.save()
+		except expression as identifier:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+		
+		# data = {"selectedCandidate":match}
+		# serializer = SoundRecordingInputModelSerializer(current, data=data)
+
+		# if serializer.is_valid():
+		# 	serializer.save()
+		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
+		
+
 
 
 class SoundRecordingInputList(APIView):
 
 	def get(self, request, format=None):
-		allSoundRecodingInputs = SoundRecordingInput.objects.all()
-		for record in allSoundRecodingInputs:
-			print(record.matches.all())
-		serializer = SoundRecordingInputModelSerializer(allSoundRecodingInputs, many=True)
+		unMatchedSoundRecordingInputs = SoundRecordingInput.objects.filter(selectedCandidate=None)
+		serializer = SoundRecordingInputModelSerializer(unMatchedSoundRecordingInputs, many=True)
 		return Response(serializer.data)
 	# def put(self, request, format=None):
 	# 	snippets = SoundRecordingInput.objects.all()
@@ -126,8 +156,8 @@ class SoundRecordingInputList(APIView):
 class SoundRecordingList(APIView):
 
 	def get(self, request, format=None):
-		allSoundRecodings= SoundRecordingInput.objects.all()
-		serializer = SoundRecordingInputModelSerializer(allSoundRecodings, many=True)
+		allSoundRecordings= SoundRecording.objects.all()
+		serializer = SoundRecordingModelSerializer(allSoundRecordings, many=True)
 		return Response(serializer.data)
 
 	# def put(self, request, format=None):
@@ -140,9 +170,9 @@ class SoundRecordingList(APIView):
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
-		ES_INDEX.refresh()
+
 		get_matches(SoundRecordingInput.objects.all())
-		
+
 		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
 
 
