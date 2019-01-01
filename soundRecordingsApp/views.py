@@ -82,7 +82,6 @@ def upload(request, type):
 	# TODO : validate and sanitize CSV file fields.
 	for line in lines:
 		fields = line.split(",")
-		print(len(line))
 		if (len(line)==0):
 			continue
 		data_dict = {}
