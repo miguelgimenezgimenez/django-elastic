@@ -82,6 +82,9 @@ def upload(request, type):
 	# TODO : validate and sanitize CSV file fields.
 	for line in lines:
 		fields = line.split(",")
+		print(len(line))
+		if (len(line)==0):
+			continue
 		data_dict = {}
 		try:
 			data_dict["artist"] = fields[0].replace('"', '')
@@ -112,19 +115,19 @@ class SoundRecordingInputDetail(APIView):
 	def put(self, request, pk, format=None):
 		current = self.get_object(pk)
 		matchId = self.request.data.get('matchId', None)
-	
-		match =SoundRecording.objects.get(pk=matchId)
+
+		if(matchId == None):
+			match = None
+		else:
+			match =SoundRecording.objects.get(pk=matchId)
+			
 		try:
 			current.selectedCandidate = match
 			current.save()
-		except expression as identifier:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+		except Exception as e:
+			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		
-		# data = {"selectedCandidate":match}
-		# serializer = SoundRecordingInputModelSerializer(current, data=data)
-
-		# if serializer.is_valid():
-		# 	serializer.save()
+		
 		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
 		
 
@@ -136,9 +139,6 @@ class SoundRecordingInputList(APIView):
 		unMatchedSoundRecordingInputs = SoundRecordingInput.objects.filter(selectedCandidate=None)
 		serializer = SoundRecordingInputMatchesSerializer(unMatchedSoundRecordingInputs, many=True)
 		return Response(serializer.data)
-	# def put(self, request, format=None):
-	# 	snippets = SoundRecordingInput.objects.all()
-	# 	serializer = SoundRecordingInputModelSerializer(snippets, many=True)
 
 	def post(self, request, format=None):
 		try:		
@@ -160,9 +160,6 @@ class SoundRecordingList(APIView):
 		serializer = SoundRecordingModelSerializer(allSoundRecordings, many=True)
 		return Response(serializer.data)
 
-	# def put(self, request, format=None):
-	# 	snippets = SoundRecordingInput.objects.all()
-	# 	serializer = SoundRecordingInputModelSerializer(snippets, many=True)
 
 	def post(self, request, format=None):
 		try:		
@@ -170,7 +167,8 @@ class SoundRecordingList(APIView):
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
-
+		# When updating the db all similarity scores will be reindexed, so the similarity scores will be deleted.This is probably not the most efficient/elegant way to do it  :(
+		SimilarityScores.objects.all().delete()
 		get_matches(SoundRecordingInput.objects.all())
 
 		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
