@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     command: bash -c "./wait-for-it.sh host:5432 -t 10 -- ./wait-for-it.sh host:9200 -t 5 -- python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/bmatProject
+      - .:/api
     ports:
       - "8000:8000"
     depends_on:
