@@ -127,8 +127,8 @@ class SoundRecordingInputDetail(APIView):
 		except Exception as e:
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		
-		
-		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
+		# for simplicity just returned a message.
+		return Response("Sound Inputs Updated", status=status.HTTP_201_CREATED)
 		
 
 
@@ -148,8 +148,8 @@ class SoundRecordingInputList(APIView):
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		
 		get_matches(uploaded_records)
-
-		return Response('ok', status=status.HTTP_201_CREATED)
+		# Another option was return the soundRecording input list, but decided to keep split functionality
+		return Response('Sound Inputs Saved', status=status.HTTP_201_CREATED)
 
 
 
