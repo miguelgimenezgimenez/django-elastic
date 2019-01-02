@@ -1,8 +1,13 @@
 # BMAT ASSESSMENT
 
 PLEASE BE AWARE THAT I HAVE NEVER USED PYTHON OR ELASTIC SEARCH!!! 
+I realize that the python code is ugly and might have mixed django rest framework methodologies, please be kind on your evaluation haha 
 
 ## PART 1:
+
+Stack: Docker, Django, ElasticSearch, Django Rest Framework, Postgresql
+
+
 To match the candidates from an in input report against the database I decided to find matches by using elastic search , to find matches the rule to follow is 
 by fuzzy searching for title and artist (having a elastic search boost of 0.5 each, so both add up together to 1), exact search for isrc ( this will have default boost =1 ), and what i wanted to do is then if any of the previous have scored, take the length into account, right now it will take it into account havin a 0.05 boost. The match score will be the elastic search score ( i actually just stored the order at which they came since they were sorted from more relevant) being the lowest number the highest score.
 
