@@ -25,12 +25,13 @@ SECRET_KEY = '_-(@u_vhcu)@9gtujym4u($3g%u#yda@plm3nl)x9bn_hqrr($'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0','localhost', '127.0.0.1','35.176.111.6']
+ALLOWED_HOSTS = ['0.0.0.0','localhost', '127.0.0.1','35.176.111.6','http://bmat.miguelgimenez.tech']
 
 CORS_ORIGIN_WHITELIST = (
 	'localhost:8080',
 	'127.0.0.1:8080',
-	'35.176.111.6'
+	'35.176.111.6',
+	'http://bmat.miguelgimenez.tech'
 )
 
 # Application definition
