@@ -135,8 +135,17 @@ class SoundRecordingInputDetail(APIView):
 class SoundRecordingInputList(APIView):
 
 	def get(self, request, format=None):
-		unMatchedSoundRecordingInputs = SoundRecordingInput.objects.filter(selectedCandidate=None)
-		serializer = SoundRecordingInputMatchesSerializer(unMatchedSoundRecordingInputs, many=True)
+
+		matched = self.request.query_params.get('matched', None)
+		print(matched)
+		if matched is  None:
+			
+			queryset = SoundRecordingInput.objects.filter(selectedCandidate=None)
+		else:
+			queryset = SoundRecordingInput.objects.exclude(selectedCandidate=None)
+
+		serializer = SoundRecordingInputMatchesSerializer(queryset, many=True)
+		
 		return Response(serializer.data)
 
 	def post(self, request, format=None):

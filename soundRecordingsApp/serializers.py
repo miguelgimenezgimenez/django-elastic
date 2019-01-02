@@ -30,7 +30,7 @@ class SoundRecordingMatchSerializer(serializers.ModelSerializer):
 
 class SoundRecordingInputMatchesSerializer(serializers.ModelSerializer):
 	matches = serializers.SerializerMethodField()
-
+	selectedCandidate = SoundRecordingModelSerializer()
 	class Meta:
 		model = SoundRecordingInput
 		fields =  '__all__'
