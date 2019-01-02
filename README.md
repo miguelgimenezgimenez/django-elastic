@@ -16,7 +16,8 @@ Maybe also giving different elastic search indexes depending on the record ( i h
 
 ## PART 2: 
 
-To do the Frontend I have decided to use React (with redux for state management), Webpack, and for styling I chose material-ui.
+Stack: React (with redux for state management), Webpack, and for styling I chose material-ui.
+
 The architechture is the following:
 
 
