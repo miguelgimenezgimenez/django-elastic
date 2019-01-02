@@ -33,7 +33,7 @@ def get_matches(soundRecordingInputs):
 			Q("multi_match", query=artist, fields=['artist'], fuzziness="AUTO", boost=0.5),
 			Q("multi_match", query=title, fields=['title'], fuzziness="AUTO", boost=0.5),
 			Q("match",isrc=isrc),
-			# The length match should only count if one of the previous fields is positive (havent )
+			# The length match should only count if one of the previous fields is positive (havent figured how to do that yet )
 			Q("multi_match", query=length, fields=['length'], boost=0.05)])
 
 		s = SoundRecordingDocument.search().query(q)

@@ -1,5 +1,46 @@
 # BMAT ASSESSMENT
 
+PLEASE BE AWARE THAT I HAVE NEVER USED PYTHON OR ELASTIC SEARCH!!! 
+
+## PART 1:
+To match the candidates from an in input report against the database I decided to find matches by using elastic search , to find matches the rule to follow is 
+by fuzzy searching for title and artist (having a elastic search boost of 0.5 each, so both add up together to 1), exact search for isrc ( this will have default boost =1 ), and what i wanted to do is then if any of the previous have scored, take the length into account, right now it will take it into account havin a 0.05 boost. The match score will be the elastic search score ( i actually just stored the order at which they came since they were sorted from more relevant) being the lowest number the highest score.
+
+If the database had millons of sound recordings, then probably the seach would have to be done in a separate thread ( i still havent figured to do that on python), 
+Maybe also giving different elastic search indexes depending on the record ( i havent digged in too deep into elastic search yet)
+
+## PART 2: 
+
+To do the Frontend I have decided to use React (with redux for state management), Webpack, and for styling I chose material-ui.
+The architechture is the following:
+
+
+# Architecture:
+
+The Project has the following structure:
+
+## Pages:
+
+Main views, they will usually render depending on the route, they usually will contain just organisms or widgets.
+
+
+## Organisms (widgets):
+  
+This will be the components that are composed of different molecules(parts) they will usually be connected to redux,they will be class components as they will have their own functionality and methods
+They dont need propTypes
+  
+## Molecules:
+
+This components will be stateless, they will be the parts that make up the organisms and should have the props "drilled" to them,  PropTypes are very important on this components as they will "describe" the
+way they should behave. They are not connected to redux.
+
+## Atoms:
+
+Units, for example buttons that are used in more than one place
+
+
+#INSTRUCTIONS
+
 The project is deployed at http://bmat.miguelgimenez.tech/
 
 **RUNNING THE PROJECT (PRODUCTION MODE ,API IN AWS INSTANCE):**
@@ -25,7 +66,7 @@ go to ``http://localhost:8080/``
 
 **API**
 
-To run the api you will have to have docker installed and  run:
+To run the api you will have to have docker installed and run from the  :
 
     $ docker-compose up
 
@@ -41,41 +82,4 @@ To run the api you will have to have docker installed and  run:
 go to ``http://localhost:8080/``
 
 
-
-
-
-
-# Architecture:
-
-
-Although this is a small project I have used an atomic architecture, consisting of pages, molecules,organisms, a layout and have added targets(dropzones) and sources(draggable elements),
-since it has dragAndDrop functionality.
-
-
-## Pages:
-
-
-Main views, usually rendered depending on the route, render all types of components.
-
-
-## Organisms:
-  
-Components that usually have children, molecules and basic components
-
-  
-## Molecules:
-
-   
-Components that render basic components.
-
-## Targets:
-
-
-Components that can be used as dropzones
-
-
-## Sources:
-
-   
-Components that are draggable.
 
