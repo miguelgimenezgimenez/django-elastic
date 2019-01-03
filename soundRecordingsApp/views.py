@@ -137,7 +137,6 @@ class SoundRecordingInputList(APIView):
 	def get(self, request, format=None):
 
 		matched = self.request.query_params.get('matched', None)
-		print(matched)
 		if matched is  None:
 			
 			queryset = SoundRecordingInput.objects.filter(selectedCandidate=None)
