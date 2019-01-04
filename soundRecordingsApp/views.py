@@ -158,11 +158,11 @@ class SoundRecordingInputList(APIView):
 	def post(self, request, format=None):
 		try:		
 			uploaded_records = upload(request, 'input_record')
+			get_matches(uploaded_records)
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		
-		get_matches(uploaded_records)
 		# Another option was return the soundRecording input list, but decided to keep split functionality
 		return Response('Sound Inputs Saved', status=status.HTTP_201_CREATED)
 
@@ -179,12 +179,13 @@ class SoundRecordingList(APIView):
 	def post(self, request, format=None):
 		try:		
 			upload(request, 'db_record')
+			SimilarityScores.objects.all().delete()
+			get_matches(SoundRecordingInput.objects.all())
 		except Exception as e:
 			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
 			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		# When updating the db all similarity scores will be reindexed, so the similarity scores will be deleted.This is probably not the most efficient/elegant way to do it  :(
-		SimilarityScores.objects.all().delete()
-		get_matches(SoundRecordingInput.objects.all())
+		
 
 		return Response("Sound Records Saved", status=status.HTTP_201_CREATED)
 
