@@ -12,7 +12,6 @@ I havent had time to implement any tests , but have used docker, elastic search 
 
 **Stack: Docker, Django, ElasticSearch, Django Rest Framework, Postgresql**
 
-
 To match the candidates from an in input report against the database I decided to find matches by using elastic search , to find matches the rule to follow is 
 by fuzzy searching for title and artist (having a elastic search boost of 0.5 each, so both add up together to 1), exact search for isrc ( this will have default boost =1 ), and what i wanted to do is then if any of the previous have scored, take the length into account, right now it will take it into account havin a 0.05 boost. The match score will be the elastic search score ( i actually just stored the order aat which they came since they were sorted from more relevant) being the lowest number the highest score.
 
@@ -24,7 +23,7 @@ Sharding the database, maybe also giving different elastic search indexes depend
 
 **Stack: React (with redux for state management), Webpack, and for styling I chose material-ui.**
 
-With the UI I created you are able to view the matches for a list of records, upload CSV files as existing records or inputs to the database, and unmatching records.
+The features of the UI  are listing the matches for a list of records, being able to select the correct match, upload CSV files as existing records or inputs to the database, and matching previously matched records.
 
 To improve the user experience there are many things that can be done, I tried to make it as user friendly as possible, and made it responsive ... But some features like offline availability ( by making it progressive and storing the queries the user made for posterior update when online), improving the ui and styles, adding an animation when the table collapses/uncollapses, code splitting for faster loading times ...
 
@@ -65,9 +64,9 @@ The project can be run in production mode, with an aws ec2 instance with docker 
 to do so just run on the frontend:
 
     $ yarn 
-
+    
     or
-
+    
     $ npm install
 
 to install dependencies and to run the project:
@@ -77,6 +76,7 @@ to install dependencies and to run the project:
 go to ``http://localhost:8080/``
 
 
+
 **RUNNING IN DEVELOPMENT MODE**
 
 **API**
@@ -84,7 +84,6 @@ go to ``http://localhost:8080/``
 To run the api you will have to have docker installed and run from the  :
 
     $ docker-compose up
-
 
 **with the container running and in the same folder run**:
 
