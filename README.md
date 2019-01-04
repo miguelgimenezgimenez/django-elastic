@@ -47,9 +47,10 @@ They dont need propTypes
 ## Molecules:
 
 This components will be stateless, they will be the parts that make up the organisms and should have the props "drilled" to them,  PropTypes are very important on this components as they will "describe" the
-way they should behave. They are not connected to redux.
+way they should behave. 
+They are not connected to redux.
 
-## Atoms:
+## Atoms: 
 
 Units, for example buttons that are used in more than one place
 
@@ -79,6 +80,8 @@ go to ``http://localhost:8080/``
 
 **RUNNING IN DEVELOPMENT MODE**
 
+You will have to populate the database through the UI by clicking on the upload buttons (for the app to work correctly you will have to upload both types of records)
+
 **API**
 
 To run the api you will have to have docker installed and run from the  :
@@ -90,9 +93,10 @@ To run the api you will have to have docker installed and run from the  :
 
     $ docker-compose run web python manage.py search_index --create
 
-to create the elastic search index
 
-FRONTEND**
+  from the folder with the Dockerfile (api)
+
+**FRONTEND**
 
  Install dependencies and:  
 
@@ -100,8 +104,6 @@ FRONTEND**
 ​    
 
 go to ``http://localhost:8080/``
-
-
 
 
 ##TODO:
