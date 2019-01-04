@@ -118,7 +118,11 @@ class SoundRecordingInputDetail(APIView):
 		if(matchId == None):
 			match = None
 		else:
-			match =SoundRecording.objects.get(pk=matchId)
+			try:
+				match =SoundRecording.objects.get(pk=matchId)
+			except SoundRecording.DoesNotExist:
+				raise Http404
+
 			
 		try:
 			current.selectedCandidate = match
