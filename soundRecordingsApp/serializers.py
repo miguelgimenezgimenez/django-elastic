@@ -19,7 +19,6 @@ class SoundRecordingInputModelSerializer(serializers.ModelSerializer):
 
 
 
-
 class SoundRecordingMatchSerializer(serializers.ModelSerializer):
 	score = serializers.IntegerField(read_only=True)
 

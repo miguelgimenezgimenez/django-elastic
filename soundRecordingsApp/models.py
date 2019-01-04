@@ -18,6 +18,7 @@ class BaseModelInterface(models.Model):
 	class Meta:
 		abstract = True
 
+
 class SoundRecordingInputModelManager(models.Manager):
 	# OVERRIDE the bulk_create method to update elastic search indexes.
 	def bulk_create(self, *args, **kwargs):		
