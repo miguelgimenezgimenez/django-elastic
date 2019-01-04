@@ -85,15 +85,14 @@ To run the api you will have to have docker installed and run from the  :
 
     $ docker-compose up
 
-**with the container running and in the same folder run**:
+**IMPORTANT!!!: with the container running and in the same folder run**:
 
 
     $ docker-compose run web python manage.py search_index --create
 
+to create the elastic search index
 
-  from the folder with the Dockerfile (api)
-
-**FRONTEND**
+FRONTEND**
 
  Install dependencies and:  
 
