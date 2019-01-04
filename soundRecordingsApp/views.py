@@ -141,13 +141,17 @@ class SoundRecordingInputList(APIView):
 	def get(self, request, format=None):
 
 		matched = self.request.query_params.get('matched', None)
-		if matched is  None:
-			
-			queryset = SoundRecordingInput.objects.filter(selectedCandidate=None)
-		else:
-			queryset = SoundRecordingInput.objects.exclude(selectedCandidate=None)
+		try:
+			if matched is  None:
+				queryset = SoundRecordingInput.objects.filter(selectedCandidate=None)
+			else:
+				queryset = SoundRecordingInput.objects.exclude(selectedCandidate=None)
 
-		serializer = SoundRecordingInputMatchesSerializer(queryset, many=True)
+			serializer = SoundRecordingInputMatchesSerializer(queryset, many=True)
+		
+		except Exception as e:
+			logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
+			return Response(repr(e), status=status.HTTP_400_BAD_REQUEST)
 		
 		return Response(serializer.data)
 
